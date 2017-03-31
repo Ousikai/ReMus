@@ -8,6 +8,12 @@ import java.awt.Point;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import edu.virginia.engine.display.Game;
 import edu.virginia.engine.display.SoundManager;
 import edu.virginia.engine.display.Sprite;
@@ -21,6 +27,7 @@ import engine.events.IEventListener;
 
 public class CoinGrabber extends Game{
 	Sprite coin = new Sprite("Coin", "coin.png");
+	Sprite coin2 = new Sprite("Coin", "coin.png");
 	Sprite mario = new Sprite("Mario", "Mario.png");
 	Sprite platform1 = new Sprite ("Platform1", "platform.png");
 	Sprite platform2 = new Sprite ("Platform2", "platform.png");
@@ -40,12 +47,25 @@ public class CoinGrabber extends Game{
 		}
 		else tInstance = TweenJuggler.getInstance();
 		
-		//soundManager.LoadMusic("dvorak", "dvorak.mp3");
-		soundManager.LoadSoundEffect("coin", "coin.wav");
-		//soundManager.PlayMusic("dvorak");
+		soundManager.LoadMusic("orchestra", "orchestra.wav");
+		soundManager.LoadMusic("canary", "canary.wav");
+		soundManager.LoadMusic("techno", "techno.wav");
+		//soundManager.PlayMusic("coin");
+		//soundManager.LoadSoundEffect("coin", "coin.wav");
+		soundManager.PlayMusic("canary");
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		this.setImage("background.png");
-		// TODO Auto-generated constructor stub
+		
 		coin.setPosition(new Point(400,4));
+		coin2.setPosition(new Point(300, 600));
 		mario.setPosition(new Point(100, 600));
 		Tween marioTween = new Tween (mario);
 		tInstance.add(marioTween);
@@ -59,7 +79,7 @@ public class CoinGrabber extends Game{
 		
 	}
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, UnsupportedAudioFileException, LineUnavailableException {
 		// TODO Auto-generated method stub
 		CoinGrabber game = new CoinGrabber();
 		//game.addEventListener(listener, eventType);
@@ -73,29 +93,33 @@ public class CoinGrabber extends Game{
 		
 		
 		/* Same, just check for null in case a frame gets thrown in before Mario is initialized */
-		if(coin != null && mario != null && platform1 != null && platform2 != null) {
+		if(coin != null && mario != null && platform1 != null && platform2 != null && coin2 != null) {
 			platform1.draw(g);
 			platform2.draw(g);
 			coin.draw(g);
+			coin2.draw(g);
 			mario.draw(g);
 			}
 		}
 		
 		g.setFont(new Font("TimesRoman", Font.PLAIN, 30));
 		if (gameEnded==true){
-			g.drawString("Congrats, you got the coin!", 800, 50);
+			g.drawString("Congrats, you got the coins!", 800, 50);
 			if (tInstance.getSize()==0){
 				this.stop();
 			}
 		}
 		else {
-			g.drawString("Get the coin!", 900, 50);
+			g.drawString("Get the coins!", 900, 50);
 		}
 		
 		}
 		
 	@Override
-	public void update(ArrayList<String> pressedKeys){
+	public void update(ArrayList<String> pressedKeys) {
+		super.update(pressedKeys);
+		//soundManager.update();
+		
 		if (gameEnded==true){
 			timeElapsed=Math.min(System.currentTimeMillis()-startTime,3000);
 			
@@ -129,7 +153,6 @@ public class CoinGrabber extends Game{
 		marioFalling++;
 		
 		
-		super.update(pressedKeys);
 		
 		
 		}
@@ -185,13 +208,37 @@ public class CoinGrabber extends Game{
 			mario.dispatchEvent(event);	
 		}
 		
-		if (mario.collidesWith(coin)){
+		if (coin2.getInPlay() && mario.collidesWith(coin2)){
+			Event event = new Event();
+			event.setEventType(CoingrabbedEvent.COINGRABBED);
+			event.setSource(coin2);
+			coin2.dispatchEvent(event);
+			//coin.setVisible(false);
+			soundManager.StopMusic("canary");
+			soundManager.PlayMusic("orchestra");
+			this.setImage("purple-background.png");
+			Tween coinTween = new Tween (coin2);
+			coin.addEventListener(myQuestManager,"Tween Start Event");
+			tInstance.add(coinTween);
+			coinTween.animate(TweenableParams.SCALE_X, 1, 4, 2000);
+			coinTween.animate(TweenableParams.SCALE_Y, 1, 4, 2000);
+			coinTween.animate(TweenableParams.X, 300, 600, 2000);
+			coinTween.animate(TweenableParams.Y, 600, 180, 2000);
+			//coinTween = new Tween(coin);
+			//tInstance.add(coinTween);
+			coinTween.animate(TweenableParams.ALPHA, 1, 0, 6000);
+			coin2.setInPlay(false);
+			//gameEnded=true;		
+		}
+		if (coin.getInPlay() && mario.collidesWith(coin)){
 			Event event = new Event();
 			event.setEventType(CoingrabbedEvent.COINGRABBED);
 			event.setSource(coin);
 			coin.dispatchEvent(event);
 			//coin.setVisible(false);
-			soundManager.PlaySoundEffect("coin");
+			soundManager.StopMusic("orchestra");
+			soundManager.PlayMusic("techno");
+			this.setImage("cool-background.png");
 			Tween coinTween = new Tween (coin);
 			coin.addEventListener(myQuestManager,"Tween Start Event");
 			tInstance.add(coinTween);
@@ -202,7 +249,8 @@ public class CoinGrabber extends Game{
 			//coinTween = new Tween(coin);
 			//tInstance.add(coinTween);
 			coinTween.animate(TweenableParams.ALPHA, 1, 0, 6000);
-			gameEnded=true;		
+			coin.setInPlay(false);
+//			gameEnded=true;		
 		}
 		}
 	}
