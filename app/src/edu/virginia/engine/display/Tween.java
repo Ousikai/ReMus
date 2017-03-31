@@ -3,11 +3,14 @@ package edu.virginia.engine.display;
 import java.awt.Point;
 import java.util.ArrayList;
 
+import engine.events.Event;
+
 public class Tween {
 	private DisplayObject object;
 	private TweenTransitions transition;
 	private ArrayList<TweenParam> params;
 	private double startTime;
+	private Event event;
 	
 	public Tween(DisplayObject object){
 		this.object=object;
@@ -20,6 +23,14 @@ public class Tween {
 		params = new ArrayList<TweenParam>();
 		startTime=System.currentTimeMillis();
 		
+	}
+	
+	public Tween(DisplayObject object, TweenTransitions transition, Event event){
+		this.object=object;
+		this.transition=transition;
+		params = new ArrayList<TweenParam>();
+		startTime=System.currentTimeMillis();
+		this.event = event;
 	}
 	public void animate(TweenableParams fieldToAnimate, double startVal, double endVal, double time){
 		TweenParam param= new TweenParam (fieldToAnimate, startVal, endVal, time);
@@ -133,5 +144,9 @@ public class Tween {
 		else if (param == TweenableParams.ALPHA){
 			object.setAlpha((float) value);
 		}
+	}
+	
+	public Event getEvent(){
+		return this.event;
 	}
 }

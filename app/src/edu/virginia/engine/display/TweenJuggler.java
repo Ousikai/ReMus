@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import engine.events.Event;
+import engine.events.IEventDispatcher;
+
 public class TweenJuggler {
 	private static TweenJuggler instance;
 	private static ArrayList<Tween> tweens;
@@ -39,6 +42,11 @@ public class TweenJuggler {
 		
 			if (tween.isComplete()==true){
 				tweens.remove(tween);
+				if (tween.getEvent() != null){
+					Event event = tween.getEvent();
+					IEventDispatcher recipient = event.getSource();
+					recipient.dispatchEvent(event);
+				}
 			}
 		}		
 	//} catch (Exception e) {

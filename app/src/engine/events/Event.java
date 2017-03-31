@@ -5,6 +5,14 @@ public class Event {
 	private String eventType;
 	private IEventDispatcher source;
 	
+	public Event(){
+	}
+	
+	public Event(String eventType, IEventDispatcher source){
+		this.eventType = eventType;
+		this.source = source;
+	}
+	
 	public String getEventType() {
 		return eventType;
 	}

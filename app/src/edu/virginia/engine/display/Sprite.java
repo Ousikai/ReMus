@@ -7,7 +7,7 @@ import java.util.ArrayList;
  * doesn't already do. Leaving it here for convenience later. you will see!
  * */
 public class Sprite extends DisplayObjectContainer {
-
+	
 	public Sprite(String id) {
 		super(id);
 	}
@@ -20,4 +20,5 @@ public class Sprite extends DisplayObjectContainer {
 	public void update(ArrayList<String> pressedKeys) {
 		super.update(pressedKeys);
 	}
+
 }

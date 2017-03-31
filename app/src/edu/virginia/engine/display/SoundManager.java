@@ -14,8 +14,8 @@ public class SoundManager {
 		soundEffects = new HashMap<String, AudioStream>();
 	}
 	public void LoadSoundEffect(String id, String filename) throws IOException{
-		System.out.println(filename);
-		InputStream in = new FileInputStream(filename);
+		String newFile = "resources/" + filename; 
+		InputStream in = new FileInputStream(newFile);
 		AudioStream audioStream = new AudioStream(in);
 		soundEffects.put(id, audioStream);
 

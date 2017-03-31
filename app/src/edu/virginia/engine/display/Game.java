@@ -3,10 +3,13 @@ package edu.virginia.engine.display;
 import java.awt.AlphaComposite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.MouseInfo;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
@@ -14,12 +17,18 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
+import com.sun.javafx.scene.paint.GradientUtils.Point;
+
+import edu.virginia.lab6test.CollisionEvent;
+import edu.virginia.lab6test.HookEvent;
+import engine.events.Event;
+
 
 /**
  * Highest level class for creating a game in Java.
  * 
  * */
-public class Game extends DisplayObjectContainer implements ActionListener, KeyListener {
+public class Game extends DisplayObjectContainer implements ActionListener, KeyListener, MouseListener {
 
 	/* Frames per second this game runs at */
 	private int FRAMES_PER_SEC = 60;
@@ -66,6 +75,7 @@ public class Game extends DisplayObjectContainer implements ActionListener, KeyL
 			}
 		});
 		getMainFrame().addKeyListener(this);
+		getMainFrame().addMouseListener(this);
 	}
 
 	/**
@@ -141,7 +151,6 @@ public class Game extends DisplayObjectContainer implements ActionListener, KeyL
 				}
 			/* Update all objects on the stage */
 			this.update(pressedKeys);
-
 			/* Draw everything on the screen */
 			this.draw(g);
 		} catch (Exception e) {
@@ -195,6 +204,48 @@ public class Game extends DisplayObjectContainer implements ActionListener, KeyL
 	@Override
 	public void keyTyped(KeyEvent e) {
 		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		
+	}
+
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		//Send event to try hookshot
+		//System.out.println("Mouse pressed!");
+		//java.awt.Point mouseCoor = MouseInfo.getPointerInfo().getLocation();
+		Event hookPressed = new Event();
+		hookPressed.setEventType(HookEvent.HOOKPRESSED);
+		hookPressed.setSource(null);
+		this.dispatchEvent(hookPressed);
+		//System.out.format("X: %d | Y: %d \n",(int)test.getX(),(int)test.getY());
+		
+	}
+
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// Hookshot reloaded
+		//System.out.println("Mouse released!");
 		
 	}
 }
