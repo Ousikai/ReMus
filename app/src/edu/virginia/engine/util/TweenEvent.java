@@ -1,6 +1,6 @@
-package edu.virginia.engine.display;
+package edu.virginia.engine.util;
 
-import edu.virginia.engine.util.Event;
+import edu.virginia.engine.display.Tween;
 
 public class TweenEvent extends Event{
 	Tween tween;

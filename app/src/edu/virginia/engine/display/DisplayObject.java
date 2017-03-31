@@ -12,8 +12,8 @@ import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
-import edu.virginia.lab6test.CollisionEvent;
-import engine.events.EventDispatcher;
+import edu.virginia.engine.util.EventDispatcher;
+import edu.virginia.engine.util.listeners.CollisionEvent;
 
 /**
  * A very basic display object for a java based gaming engine

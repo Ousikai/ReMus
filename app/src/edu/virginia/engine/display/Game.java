@@ -19,9 +19,9 @@ import javax.swing.Timer;
 
 import com.sun.javafx.scene.paint.GradientUtils.Point;
 
-import edu.virginia.lab6test.CollisionEvent;
-import edu.virginia.lab6test.HookEvent;
-import engine.events.Event;
+import edu.virginia.engine.util.Event;
+import edu.virginia.engine.util.listeners.CollisionEvent;
+import edu.virginia.engine.util.listeners.HookEvent;
 
 
 /**

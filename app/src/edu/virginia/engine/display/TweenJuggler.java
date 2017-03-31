@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import engine.events.Event;
-import engine.events.IEventDispatcher;
+import edu.virginia.engine.util.Event;
+import edu.virginia.engine.util.IEventDispatcher;
 
 public class TweenJuggler {
 	private static TweenJuggler instance;

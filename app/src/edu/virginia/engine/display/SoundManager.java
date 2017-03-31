@@ -13,7 +13,7 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
-import engine.events.IEventListener;
+import edu.virginia.engine.util.IEventListener;
 
 public class SoundManager {
 
@@ -31,7 +31,7 @@ public class SoundManager {
 	}
 	public void LoadSoundEffect(String id, String filename) throws IOException{
 		System.out.println(filename);
-		InputStream in = new FileInputStream(filename);
+		InputStream in = new FileInputStream("resources/" + filename);
 		AudioStream audioStream = new AudioStream(in);
 		soundEffects.put(id, audioStream);
 
@@ -40,17 +40,14 @@ public class SoundManager {
 		 AudioPlayer.player.start(soundEffects.get(id));
 	}
 	public void LoadMusic(String id, String filename) throws IOException{
-		InputStream in = new FileInputStream(filename);
+		InputStream in = new FileInputStream("resources/" + filename);
 		AudioStream audioStream = new AudioStream(in);
 		soundEffects.put(id, audioStream);
 		currentMusicID = id;
 		setCurrentFile(filename);
 	}
 	public void PlayMusic(String id){ //music loops and plays forever, consider adding a parameter for looping
-		AudioPlayer.player.start(soundEffects.get(id));
-		
-		 
-		 
+		AudioPlayer.player.start(soundEffects.get(id)); 
 	}
 	
 	public void StopMusic(String id) {

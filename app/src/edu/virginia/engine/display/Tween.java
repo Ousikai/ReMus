@@ -3,7 +3,7 @@ package edu.virginia.engine.display;
 import java.awt.Point;
 import java.util.ArrayList;
 
-import engine.events.Event;
+import edu.virginia.engine.util.Event;
 
 public class Tween {
 	private DisplayObject object;
