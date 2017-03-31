@@ -7,6 +7,10 @@ import java.util.ArrayList;
  * doesn't already do. Leaving it here for convenience later. you will see!
  * */
 public class Sprite extends DisplayObjectContainer {
+
+	private boolean inPlay = true;
+	
+	
 	
 	public Sprite(String id) {
 		super(id);
@@ -21,4 +25,11 @@ public class Sprite extends DisplayObjectContainer {
 		super.update(pressedKeys);
 	}
 
+	public boolean getInPlay() {
+		return inPlay;
+	}
+
+	public void setInPlay(boolean inPlay) {
+		this.inPlay = inPlay;
+	}
 }
