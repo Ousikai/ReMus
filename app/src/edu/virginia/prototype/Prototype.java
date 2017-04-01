@@ -27,7 +27,7 @@ import edu.virginia.engine.util.listeners.MyQuestManager;
 import edu.virginia.engine.util.listeners.PlayerEvent;
 import edu.virginia.engine.util.listeners.PlayerListener;
 
-public class MainGame extends Game{
+public class Prototype extends Game{
 	Sprite coin = new Sprite("Coin", "coin.png");
 	Sprite coin2 = new Sprite("Coin", "coin.png");
 	Sprite crosshairs = new Sprite("Coin", "crosshairs7.png");
@@ -45,7 +45,7 @@ public class MainGame extends Game{
 	double startTime=System.currentTimeMillis();
 	double timeElapsed=0;
 	
-	public MainGame() throws IOException {
+	public Prototype() throws IOException {
 		super("Restoration of Sound", 1600, 768);
 		/* Set TweenJuggler */
 		if (TweenJuggler.getInstance() == null){tInstance = new TweenJuggler();}
@@ -80,7 +80,7 @@ public class MainGame extends Game{
 
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
-		MainGame game = new MainGame();
+		Prototype game = new Prototype();
 		//game.addEventListener(listener, eventType);
 		game.start();
 	}

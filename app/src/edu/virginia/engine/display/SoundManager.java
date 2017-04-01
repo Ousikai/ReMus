@@ -30,7 +30,6 @@ public class SoundManager {
 		this.currentFile = currentFile;
 	}
 	public void LoadSoundEffect(String id, String filename) throws IOException{
-		System.out.println(filename);
 		InputStream in = new FileInputStream("resources/" + filename);
 		AudioStream audioStream = new AudioStream(in);
 		soundEffects.put(id, audioStream);
