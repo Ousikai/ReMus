@@ -119,7 +119,7 @@ public class NotesCollection extends Game{
 		}
 		
 	@Override
-	public void update(ArrayList<String> pressedKeys){
+	public void update(ArrayList<Integer> pressedKeys){
 		if (gameEnded==true){
 			timeElapsed=Math.min(System.currentTimeMillis()-startTime,3000);
 			
@@ -131,11 +131,11 @@ public class NotesCollection extends Game{
 		}
 		//for (int i=0; i<pressedKeys.size(); i++){
 		if (mario!=null){
-		if ((pressedKeys.contains("Left")) && mario.getPosition().getX()>=4){
+		if ((pressedKeys.contains(37)) && mario.getPosition().getX()>=4){
 			mario.getPosition().translate(-10, 0);
 			//mario.getPivotPoint().translate(-20, 0);
 		}
-		if ((pressedKeys.contains("Right")) && mario.getPosition().getX()<=1600-mario.getUnscaledWidth()){
+		if ((pressedKeys.contains(39)) && mario.getPosition().getX()<=1600-mario.getUnscaledWidth()){
 			mario.getPosition().translate(10, 0);
 			//mario.getPivotPoint().translate(20, 0);
 		}
@@ -143,7 +143,7 @@ public class NotesCollection extends Game{
 		//	mario.getPosition().translate(0, 4);
 		//	//mario.getPivotPoint().translate(0, 10);
 		//}
-		if ((pressedKeys.contains("Up")) && mario.getPosition().getY()>=4 && this.onGround==true){
+		if ((pressedKeys.contains(38)) && mario.getPosition().getY()>=4 && this.onGround==true){
 			this.marioFalling=-25;
 			this.onGround=false;
 			//mario.getPosition().translate(0, -10);

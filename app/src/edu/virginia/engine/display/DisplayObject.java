@@ -227,7 +227,7 @@ public class DisplayObject extends EventDispatcher{
 	 * objects state before the draw occurs. Should be overridden if necessary
 	 * to update objects appropriately.
 	 * */
-	protected void update(ArrayList<String> pressedKeys) {
+	protected void update(ArrayList<Integer> pressedKeys) {
 		
 	}
 

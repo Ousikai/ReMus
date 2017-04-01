@@ -108,7 +108,7 @@ public class AnimatedSprite extends Sprite implements ActionListener {
 	
 	
 	@Override
-	public void update(ArrayList<String> pressedKeys) {
+	public void update(ArrayList<Integer> pressedKeys) {
 		super.update(pressedKeys);
 	}
 	

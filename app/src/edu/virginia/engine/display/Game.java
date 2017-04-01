@@ -185,19 +185,17 @@ public class Game extends DisplayObjectContainer implements ActionListener, KeyL
 		return scenePanel;
 	}
 
-	ArrayList<String> pressedKeys = new ArrayList<String>();
+	ArrayList<Integer> pressedKeys = new ArrayList<Integer>();
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if(!pressedKeys.contains(KeyEvent.getKeyText(e.getKeyCode())))
-			pressedKeys.add(KeyEvent.getKeyText(e.getKeyCode()));
+		if(!pressedKeys.contains((Integer)e.getKeyCode()))
+			pressedKeys.add((Integer)e.getKeyCode());
 	}
-
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		if(pressedKeys.contains(KeyEvent.getKeyText(e.getKeyCode())))
-			pressedKeys.remove(KeyEvent.getKeyText(e.getKeyCode()));
-		
+		if(pressedKeys.contains((Integer)e.getKeyCode()))
+			pressedKeys.remove((Integer)e.getKeyCode());
 	}
 
 

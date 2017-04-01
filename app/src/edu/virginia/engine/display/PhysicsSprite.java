@@ -21,23 +21,27 @@ public class PhysicsSprite extends Sprite {
 	}
 	
 	@Override
-	public void update(ArrayList<String> pressedKeys) {
+	public void update(ArrayList<Integer> pressedKeys) {
 		super.update(pressedKeys);
 		/* If player can accept inputs */
 		
 		if (this.inPlay){
-			if ((pressedKeys.contains("Up")) && !this.isInAir()){
+			/* Up */
+			if ((pressedKeys.contains(38)) && !this.isInAir()){
 				this.yVel = -15;
 				this.inAir = true;
 			}
-			if ((pressedKeys.contains("Left")) && this.getPosition().getX()>=4){
+			/* Left */
+			if ((pressedKeys.contains(37)) && this.getPosition().getX()>=4){
 				this.getPosition().translate(-10, 0);
 				//mario.getPivotPoint().translate(-20, 0);
 			}
-			if ((pressedKeys.contains("Right")) && this.getPosition().getX()<=1600-this.getUnscaledWidth()){
+			/* Right */
+			if ((pressedKeys.contains(39)) && this.getPosition().getX()<=1600-this.getUnscaledWidth()){
 				this.getPosition().translate(10, 0);
 				//mario.getPivotPoint().translate(20, 0);
 			}
+			/* Down (which is 40) */
 			/* If player is in the Air*/
 			if (this.inAir){
 				this.yVel += this.gravity;

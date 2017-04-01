@@ -116,7 +116,7 @@ public class Prototype extends Game{
 	}
 		
 	@Override
-	public void update(ArrayList<String> pressedKeys){
+	public void update(ArrayList<Integer> pressedKeys){
 		if (gameEnded==true){
 			timeElapsed=Math.min(System.currentTimeMillis()-startTime,3000);
 			
