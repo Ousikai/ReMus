@@ -1,6 +1,3 @@
 # CS4730-Game-Design-Project
 
-
-ayy lmao
-
-Cats are the best Dogs smell
+**Restoration of Sound** (working title) game repository

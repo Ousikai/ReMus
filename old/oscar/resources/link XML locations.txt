@@ -1,4 +1,0 @@
-//Sprites
- 1200 x 1040 || 10 sprites * 8 sprites || 120px * 130px
-
-4*130 = 520 (running spriteY)
