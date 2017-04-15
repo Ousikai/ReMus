@@ -25,14 +25,20 @@ public class PlayerListener implements IEventListener {
 	public void handleEvent(Event event) {
 		/* Start falling at 0 yVel */
 		if (event.getEventType().equals(PlayerEvent.ResetFall)){
+			this.parent.setHookReady(true);
 			this.parent.resetFall();
 		}
 		/* Fall ontop of platform */
 		if (event.getEventType().equals(CollisionEvent.PLATFORM)){
 			Sprite source = (Sprite) event.getSource();
-			int sourceX = (int) source.getPosition().getX();
-			int sourceY = (int) source.getPosition().getY();
+			int parentX = (int) parent.getPosition().getX();
+			int parentYOverlap = (int) parent.getPosition().getY() + parent.getUnscaledHeight();
+			int platformY = (int) source.getPosition().getY();
+			int overlapY = parentYOverlap - platformY;
+			int newY = (int) parent.getPosition().getY() - overlapY;
+			parent.setPosition(new Point(parentX, newY));
 			parent.setInAir(false);
+			parent.setYVel(0);
 		}
 		/* Fall to the bottom of the screen */
 		if (event.getEventType().equals(CollisionEvent.GROUND)){

@@ -4,6 +4,7 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -17,11 +18,12 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
-import com.sun.javafx.scene.paint.GradientUtils.Point;
-
 import edu.virginia.engine.util.Event;
 import edu.virginia.engine.util.listeners.CollisionEvent;
 import edu.virginia.engine.util.listeners.HookEvent;
+import edu.virginia.engine.util.listeners.HookListener;
+import edu.virginia.engine.util.listeners.PlayerEvent;
+import edu.virginia.engine.util.listeners.PlayerListener;
 
 
 /**
@@ -188,6 +190,7 @@ public class Game extends DisplayObjectContainer implements ActionListener, KeyL
 	ArrayList<Integer> pressedKeys = new ArrayList<Integer>();
 	@Override
 	public void keyPressed(KeyEvent e) {
+		//System.out.println("keyPressed: " + (Integer)e.getKeyCode());
 		if(!pressedKeys.contains((Integer)e.getKeyCode()))
 			pressedKeys.add((Integer)e.getKeyCode());
 	}
@@ -205,6 +208,38 @@ public class Game extends DisplayObjectContainer implements ActionListener, KeyL
 		
 	}
 
+	public void setupHookshot(PhysicsSprite player, 
+							  PlayerListener playerListener, 
+							  HookListener hookListener){
+		/* Set event listeners */
+		/* Set player event listeners */
+		player.addEventListener(playerListener, CollisionEvent.PLATFORM);
+		player.addEventListener(playerListener, CollisionEvent.GROUND);
+		player.addEventListener(playerListener, CollisionEvent.INAIR);
+		player.addEventListener(playerListener, PlayerEvent.ResetFall);
+		/* Set hookshot event listeners */
+		player.addEventListener(hookListener, HookEvent.HOOKPRESSED);
+		player.addEventListener(hookListener, HookEvent.HOOKRELEASED);
+		player.addEventListener(hookListener, HookEvent.CANHOOK);
+		player.addEventListener(hookListener, HookEvent.CANNOTHOOK);
+		player.addEventListener(hookListener, HookEvent.HOOKHOP);		
+	}
+	
+	public void drawCrosshairsKeyboard(Sprite crosshairs, PhysicsSprite player){
+		/* Find where crosshair should be based on mouse location */
+		float crosshairsAngle = player.getCrosshairsAngle();
+		/* Set crosshair position, where center is player Center */
+		int radius = 200;
+		int radiusX = (int) (Math.cos(Math.toRadians(crosshairsAngle)) * radius);
+		int radiusY = (int) (Math.sin(Math.toRadians(crosshairsAngle)) * radius);
+		int crosshairsX = player.getCenterX() + radiusX;
+		int crosshairsY = player.getCenterY() + radiusY;
+		//System.out.format("cX: %d | cY: %d \n",crosshairsX, crosshairsY);
+		/* Adjust crosshairs to (pivot?) point */
+		player.setCrosshairsAngle(crosshairsAngle);
+		Point adjustedPoint = new Point(crosshairsX, crosshairsY);
+		crosshairs.setPosition(adjustedPoint);
+	}
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
@@ -228,22 +263,18 @@ public class Game extends DisplayObjectContainer implements ActionListener, KeyL
 
 	@Override
 	public void mousePressed(MouseEvent e) {
-		//Send event to try hookshot
-		//System.out.println("Mouse pressed!");
-		//java.awt.Point mouseCoor = MouseInfo.getPointerInfo().getLocation();
+		/*
+		System.out.println("Pressed"); 
 		Event hookPressed = new Event();
 		hookPressed.setEventType(HookEvent.HOOKPRESSED);
 		hookPressed.setSource(null);
 		this.dispatchEvent(hookPressed);
-		//System.out.format("X: %d | Y: %d \n",(int)test.getX(),(int)test.getY());
-		
+		*/
 	}
 
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		// Hookshot reloaded
-		//System.out.println("Mouse released!");
 		
 	}
 }

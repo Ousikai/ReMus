@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import edu.virginia.engine.util.EventDispatcher;
-import edu.virginia.engine.util.listeners.CollisionEvent;
 
 /**
  * A very basic display object for a java based gaming engine
@@ -28,6 +27,7 @@ public class DisplayObject extends EventDispatcher{
 	private BufferedImage displayImage;
 	
 	private boolean visible;
+	private boolean inPlay = true;
 	private Point position;
 	private Point pivotPoint;
 	private double scaleX;
@@ -37,6 +37,8 @@ public class DisplayObject extends EventDispatcher{
 	private Rectangle hitbox;
 	
 	private DisplayObject parent;
+	
+	
 	
 
 	/**
@@ -96,7 +98,7 @@ public class DisplayObject extends EventDispatcher{
 		return this.displayImage;
 	}
 
-	protected void setImage(String imageName) {
+	public void setImage(String imageName) {
 		if (imageName == null) {
 			return;
 		}
@@ -115,26 +117,28 @@ public class DisplayObject extends EventDispatcher{
 	}
 	
 	public Point getPosition(){
-		if (this.parent==null)
 		return this.position;
-		
-		else {
-			Point p=new Point(this.position);
-			p.translate(-(int)this.parent.getPosition().getX(), -(int)this.parent.getPosition().getY());
-			return p;
-		}
 	}
 	
 	public void setPosition(Point p){
-		//if (this.parent==null){
 		this.position=p;
-		//}
-		
-		//else {
-		//	p.translate((int)this.parent.getPosition().getX(), (int)this.parent.getPosition().getY());
-			this.position=p;
-			
-		//}
+	}
+	
+	public Point getGlobalPosition(){
+		int parentX = 0;
+		int parentY = 0;
+		// Parent exists, use recursion to find global coordinates
+		if (this.parent != null){
+			Point parentCoor = this.parent.getGlobalPosition();
+			parentX = (int) parentCoor.getX();
+			parentY = (int) parentCoor.getY();
+		}
+		int ourX = (int) this.getPosition().getX();
+		int ourY = (int) this.getPosition().getY();
+		int currX = ourX + parentX;
+		int currY = ourY + parentY;
+		if (this.getId().equals("Platform2")){System.out.format("Plat2 x: %d y: %d\n",currX, currY);}
+		return (new Point(currX, currY));
 	}
 	
 	public Point getPivotPoint(){
@@ -200,6 +204,35 @@ public class DisplayObject extends EventDispatcher{
 		return false;
 	}
 	
+	public boolean collidesWithRectangle(Rectangle other){
+		if (this.getHitbox().intersects(other)){
+			return true;
+		}
+		return false;
+	}
+	
+	public int getCenterX(){
+		return (int) this.getPosition().getX() + this.getUnscaledWidth()/2;
+	}
+	
+	public int getCenterY(){
+		return (int) this.getPosition().getY() + this.getUnscaledHeight()/2;
+	}
+	
+	public float getAngle(Point target) {
+		/* x and y are both the center of the DisplayObject */
+		int x = this.getCenterX();
+		int y = this.getCenterY();
+		
+	    float angle = (float) Math.toDegrees(Math.atan2(target.y - y, target.x - x));
+
+	    if(angle < 0){
+	        angle += 360;
+	    }
+	    //System.out.println("Angle: " + angle);
+	    return angle;
+	}
+	
 	/**
 	 * Helper function that simply reads an image from the given image name
 	 * (looks in resources\\) and returns the bufferedimage for that filename
@@ -228,7 +261,6 @@ public class DisplayObject extends EventDispatcher{
 	 * to update objects appropriately.
 	 * */
 	protected void update(ArrayList<Integer> pressedKeys) {
-		
 	}
 
 	/**
@@ -253,7 +285,9 @@ public class DisplayObject extends EventDispatcher{
 			Graphics2D g2d = (Graphics2D) g;
 			applyTransformations(g2d);
 			/* Actually draw the image, perform the pivot point translation here */
-			g2d.drawImage(displayImage, 0, 0,
+			g2d.drawImage(displayImage, 
+					0, 
+					0,
 					(int) (getUnscaledWidth()),
 					(int) (getUnscaledHeight()), null);
 			
@@ -270,7 +304,7 @@ public class DisplayObject extends EventDispatcher{
 	 * object
 	 * */
 	protected void applyTransformations(Graphics2D g2d) {
-		g2d.translate(this.position.getX(), this.position.getY());
+		g2d.translate(this.position.getX() + this.pivotPoint.getX(), this.position.getY() + this.pivotPoint.getY());
 		g2d.rotate(this.rotation*(3.1416)/180, this.pivotPoint.getX(), this.pivotPoint.getY());
 		g2d.scale(this.scaleX, this.scaleY);
 		g2d.setComposite(makeComposite(this.getAlpha()));
@@ -287,7 +321,15 @@ public class DisplayObject extends EventDispatcher{
 		g2d.setComposite(makeComposite(1));
 		g2d.scale(1/this.scaleX, 1/this.scaleY);
 		g2d.rotate(-(this.rotation*(3.1416)/180), this.pivotPoint.getX(), this.pivotPoint.getY());
-		g2d.translate(-this.position.getX(), -this.position.getY());
+		g2d.translate(-this.position.getX() - this.pivotPoint.getX(), -this.position.getY() - this.pivotPoint.getY());
+	}
+
+	public boolean getInPlay() {
+		return inPlay;
+	}
+
+	public void setInPlay(boolean inPlay) {
+		this.inPlay = inPlay;
 	}
 
 }

@@ -2,23 +2,28 @@
 
 package edu.virginia.prototype;
 
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import edu.virginia.engine.display.DisplayObject;
+import edu.virginia.engine.display.DisplayObjectContainer;
 import edu.virginia.engine.display.Game;
 import edu.virginia.engine.display.PhysicsSprite;
-import edu.virginia.engine.display.SoundManager;
 import edu.virginia.engine.display.Sprite;
 import edu.virginia.engine.display.Tween;
 import edu.virginia.engine.display.TweenJuggler;
 import edu.virginia.engine.display.TweenableParams;
 import edu.virginia.engine.util.Event;
+import edu.virginia.engine.util.GameClock;
 import edu.virginia.engine.util.IEventDispatcher;
 import edu.virginia.engine.util.IEventListener;
+import edu.virginia.engine.util.SoundManager;
 import edu.virginia.engine.util.listeners.CoingrabbedEvent;
 import edu.virginia.engine.util.listeners.CollisionEvent;
 import edu.virginia.engine.util.listeners.HookEvent;
@@ -30,21 +35,17 @@ import edu.virginia.engine.util.listeners.PlayerListener;
 public class Prototype extends Game{
 	Sprite coin = new Sprite("Coin", "coin.png");
 	Sprite coin2 = new Sprite("Coin", "coin.png");
-	Sprite crosshairs = new Sprite("Coin", "crosshairs7.png");
+	Sprite crosshairs = new Sprite("Crosshairs", "crosshairs7.png");
 	PhysicsSprite mario = new PhysicsSprite("Mario", "Mario.png");
-	Sprite platform1 = new Sprite ("Platform1", "platformBlue.png");
-	Sprite platform2 = new Sprite ("Platform2", "platformBlue.png");
-	Sprite platform3 = new Sprite ("Platform3", "platformBlue.png");
-	int marioFalling=0;
+	DisplayObjectContainer foregroundFalling = new DisplayObjectContainer("Foreground Falling");
+	DisplayObjectContainer platformCollection = new DisplayObjectContainer("Platform Collection");
 	MyQuestManager myQuestManager = new MyQuestManager();
 	SoundManager soundManager = new SoundManager();
 	boolean gameEnded=false;
 	TweenJuggler tInstance;
-	HookListener hookListener = new HookListener(mario, tInstance);
-	PlayerListener playerListener = new PlayerListener(mario, tInstance);
 	double startTime=System.currentTimeMillis();
 	double timeElapsed=0;
-	
+	GameClock timeSinceFall = new GameClock();
 	public Prototype() throws IOException {
 		super("Restoration of Sound", 1600, 768);
 		/* Set TweenJuggler */
@@ -54,28 +55,25 @@ public class Prototype extends Game{
 		this.setImage("background.png");
 		/* Set sprite positions */
 		mario.setPosition(new Point(100, 600));
-		platform1.setPosition(new Point(100, 150));
-		platform2.setPosition(new Point(550,450));
-		platform3.setPosition(new Point(1200, 400));
+		crosshairs.setPivotPoint(new Point(-26, -26));
 		coin.setPosition(new Point(400,4));
 		coin2.setPosition(new Point(1270, 250));
-		drawCrosshairs(crosshairs);
-		/* Set event listeners */
+		drawCrosshairsKeyboard(crosshairs, mario);
 		mario.addEventListener(myQuestManager, CollisionEvent.COLLISION);
-		mario.addEventListener(playerListener, CollisionEvent.PLATFORM);
-		mario.addEventListener(playerListener, CollisionEvent.GROUND);
-		mario.addEventListener(playerListener, CollisionEvent.INAIR);
-		mario.addEventListener(playerListener, PlayerEvent.ResetFall);
-		this.addEventListener(hookListener, HookEvent.HOOKPRESSED);
-		this.addEventListener(hookListener, HookEvent.HOOKRELEASED);
-		this.addEventListener(hookListener, HookEvent.CANHOOK);
-		this.addEventListener(hookListener, HookEvent.CANNOTHOOK);
-		mario.addEventListener(hookListener, HookEvent.HOOKHOP);
+		/* Set up sprites that will fall in the foreground */
+		this.addChild(foregroundFalling);
+			//foregroundFalling.addChild(mario);
+			/* Set up platforms */
+			this.setupPlatforms(foregroundFalling);
+		/* Set up hookshot */
+		HookListener hookListener = new HookListener(mario, tInstance);
+		PlayerListener playerListener = new PlayerListener(mario, tInstance);
+		this.setupHookshot(mario, playerListener, hookListener);
 		/* Load music */
-		soundManager.LoadMusic("orchestra", "orchestra.wav");
-		soundManager.LoadMusic("canary", "canary.wav");
-		soundManager.LoadMusic("techno", "techno.wav");
-		soundManager.PlayMusic("canary");
+		//soundManager.LoadMusic("orchestra", "orchestra.wav");
+		//soundManager.LoadMusic("canary", "canary.wav");
+		//soundManager.LoadMusic("techno", "techno.wav");
+		//soundManager.PlayMusic("canary");
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -87,21 +85,45 @@ public class Prototype extends Game{
 	
 	@Override
 	public void draw(Graphics g){
-		if (coin != null){
+		/* Draw all assets */
 		super.draw(g);
-		
 		
 		/* Same, just check for null in case a frame gets thrown in before Mario is initialized*/
 		if(coin != null && mario != null) {
-			platform1.draw(g);
-			platform2.draw(g);
-			platform3.draw(g);
 			coin.draw(g);
 			coin2.draw(g);
 			mario.draw(g);
 			crosshairs.draw(g);
+			//crosshairs2.draw(g);
+			/* Draw test rectangle
+			 * 
+			 */
+			int hitboxWidth = (int) crosshairs.getPosition().getX() - mario.getCenterX();
+			int hitboxHeight = (int) crosshairs.getPosition().getY() - mario.getCenterY();
+			int hitboxX = mario.getCenterX();
+			int hitboxY = mario.getCenterY();
+			if (hitboxWidth < 0){
+				hitboxX += hitboxWidth;
+				hitboxWidth *= -1;
 			}
-		} 
+			if (hitboxHeight < 0){
+				hitboxY += hitboxHeight;
+				hitboxHeight *= -1;
+			}
+			g.setColor(Color.RED);
+			/*System.out.format("Rectangle Params: %d %d %d %d \n", 
+					hitboxX,
+					hitboxY,
+					hitboxWidth,
+					hitboxHeight);*/
+			g.fillRect(
+					hitboxX,
+					hitboxY,
+					hitboxWidth,
+					hitboxHeight);
+		
+		}
+		
 		
 		g.setFont(new Font("TimesRoman", Font.PLAIN, 30));
 		if (gameEnded==true){
@@ -124,20 +146,15 @@ public class Prototype extends Game{
 		if (tInstance!=null){tInstance.nextFrame();}
 		super.update(pressedKeys);
 		
-		/* Draw sprites */
-		drawCrosshairs(crosshairs);
-		if (crosshairs.collidesWith(platform1) || 
-			crosshairs.collidesWith(platform2) || 
-			crosshairs.collidesWith(platform3)){
-			this.dispatchEvent(new Event(HookEvent.CANHOOK, this));
-		}
-		else {
-			this.dispatchEvent(new Event(HookEvent.CANNOTHOOK, this));
-		}
+		/* Check hook status */
+		drawCrosshairsKeyboard(crosshairs, mario);
+		platformCollection.hookablePlatform(crosshairs, mario);
+		/* Have foreground elements fall */
+		updateForegroundFalling(foregroundFalling, timeSinceFall);
 		
 		/* Make sure mario is not null. Sometimes Swing can auto cause an extra frame to go before everything is initialized */
 		if(mario != null) mario.update(pressedKeys);
-		if (coin != null && mario != null){
+		if (coin != null && mario != null && mario.isInPlay()){
 			
 			/* Parent collides with coin */
 			if (coin.getInPlay() && mario.collidesWith(coin)){
@@ -146,9 +163,9 @@ public class Prototype extends Game{
 				event.setSource(coin);
 				coin.dispatchEvent(event);
 				//coin.setVisible(false);
-				soundManager.StopMusic("canary");
-				soundManager.StopMusic("orchestra");
-				soundManager.PlayMusic("techno");
+				//soundManager.StopMusic("canary");
+				//soundManager.StopMusic("orchestra");
+				//soundManager.PlayMusic("techno");
 				this.setImage("cool-background.png");
 				Tween coinTween = new Tween (coin);
 				coin.addEventListener(myQuestManager,"Tween Start Event");
@@ -170,9 +187,9 @@ public class Prototype extends Game{
 				event.setSource(coin2);
 				coin2.dispatchEvent(event);
 				//coin.setVisible(false);
-				soundManager.StopMusic("canary");
-				soundManager.StopMusic("techno");
-				soundManager.PlayMusic("orchestra");
+				//soundManager.StopMusic("canary");
+				//soundManager.StopMusic("techno");
+				//soundManager.PlayMusic("orchestra");
 				this.setImage("space-bg.jpg");
 				Tween coinTween = new Tween (coin2);
 				coin.addEventListener(myQuestManager,"Tween Start Event");
@@ -192,22 +209,14 @@ public class Prototype extends Game{
 			if (!coin.getInPlay() && !coin2.getInPlay()){
 				gameEnded=true;
 			}
-			
-			/* Parent is colliding with platform */
-			if (mario.collidesWith(platform1)){
-				mario.dispatchEvent(new Event(CollisionEvent.PLATFORM, platform1));
+			/* Player colliding with platform */
+			if (platformCollection.collidesWithPlatform(mario)){
+				// If true, player will send collision event to all listeners.
 			}
-			else if (mario.collidesWith(platform2)){
-				mario.dispatchEvent(new Event(CollisionEvent.PLATFORM, platform2));
-			}
-			else if (mario.collidesWith(platform3)){
-				mario.dispatchEvent(new Event(CollisionEvent.PLATFORM, platform3));
-			}
-			/* Parent is in the Air*/
+			/* Player is in the Air*/
 			else {
 				mario.dispatchEvent(new Event(CollisionEvent.INAIR, null));
 			}
-			
 			/* Parent is on the ground */
 			if(mario.getPosition().getY()>600){
 				mario.dispatchEvent(new Event(CollisionEvent.GROUND, null));
@@ -215,14 +224,82 @@ public class Prototype extends Game{
 		}
 	}
 
-	public void drawCrosshairs(Sprite crosshairs){
+	/*
+	public void drawCrosshairsMouse(Sprite crosshairs, PhysicsSprite player){
 		Point mouseCoor = MouseInfo.getPointerInfo().getLocation();
-		int mouseX = (int) mouseCoor.getX();
-		mouseX -= 28;
-		int mouseY = (int) mouseCoor.getY();
-		mouseY -= 50;
-		Point adjustedPoint = new Point(mouseX, mouseY);
+		float crosshairsAngle = player.getAngle(mouseCoor);
+		int radius = 150;
+		int radiusX = (int) (Math.cos(Math.toRadians(crosshairsAngle)) * radius);
+		int radiusY = (int) (Math.sin(Math.toRadians(crosshairsAngle)) * radius);
+		int crosshairsX = player.getCenterX() + radiusX;
+		int crosshairsY = player.getCenterY() + radiusY;
+		player.setCrosshairsAngle(crosshairsAngle);
+		Point adjustedPoint = new Point(crosshairsX, crosshairsY);
 		crosshairs.setPosition(adjustedPoint);
+	}*/
+	
+	public void updateBackgroundFalling(DisplayObjectContainer backgroundRoot){
+		/* Only fall if timer value has been passed */
+		int timeBetweenFall = 150;
+		if (timeSinceFall.getElapsedTime() > timeBetweenFall){
+			/* Have your children fall */
+			for (int i = 0; i < backgroundRoot.numberOfChildren(); i++){
+				DisplayObject toFallNext = backgroundRoot.getChildAtIndex(i);
+				int x = (int) toFallNext.getPosition().getX();
+				int y = (int) toFallNext.getPosition().getY();
+				int foregroundFallSpeed = 1;
+				int newY = y + foregroundFallSpeed;
+				toFallNext.setPosition(new Point(x,newY));
+			}
+			/* Reset timer */
+			timeSinceFall.resetGameClock();
+		}
 	}
+	
+	public void updateForegroundFalling(DisplayObjectContainer foregroundRoot, GameClock timeSinceFall){
+		/* Only fall if timer value has been passed */
+		int timeBetweenFall = 50;
+		if (timeSinceFall.getElapsedTime() > timeBetweenFall){
+			/* Have your children fall */
+			for (int i = 0; i < foregroundRoot.numberOfChildren(); i++){
+				DisplayObject toFallNext = foregroundRoot.getChildAtIndex(i);
+				childForegroundFalling((DisplayObjectContainer)toFallNext);
+			}
+			/* Reset timer */
+			timeSinceFall.resetGameClock();
+		}
+	}
+	
+	public void childForegroundFalling(DisplayObjectContainer toFallCurrent){
+		/* Falling yourself */
+		int x = (int) toFallCurrent.getPosition().getX();
+		int y = (int) toFallCurrent.getPosition().getY();
+		int foregroundFallSpeed = 1;
+		int newY = y + foregroundFallSpeed;
+		toFallCurrent.setPosition(new Point(x,newY));
+		for (int i = 0; i < toFallCurrent.numberOfChildren(); i++){
+			DisplayObject toFallNext = toFallCurrent.getChildAtIndex(i);
+			childForegroundFalling((DisplayObjectContainer)toFallNext);
+		}	
+	}
+	
+	public void setupPlatforms(DisplayObjectContainer foregroundFalling){
+		/* Create platforms */
+		Sprite platform1 = new Sprite ("Platform1", "platformBlue.png");
+		platform1.setPosition(new Point(100, 150));
+		Sprite platform2 = new Sprite ("Platform2", "platformBlue.png");
+		platform2.setPosition(new Point(600,450));
+		Sprite platform3 = new Sprite ("Platform3", "platformBlue.png");
+		platform3.setPosition(new Point(1200, 400));
+		/* Set up display hierachy */
+		foregroundFalling.addChild(platformCollection);
+		platformCollection.addChild(platform1);
+		platformCollection.addChild(platform2);
+		platformCollection.addChild(platform3);
+	}
+	
+	public void setupCollectables(DisplayObjectContainer foregroundFalling){
+	}
+
 	
 }
