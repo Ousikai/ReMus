@@ -124,9 +124,10 @@ public class LisaRiccia extends Game{
 			// TODO: Replace with victory splash screen
 			lossScreen.draw(g);
 			g.setFont(new Font("KinoMT", Font.PLAIN, 80));
-			g.drawString("You Lose!", 500, 350);
-			g.setFont(new Font("KinoMT", Font.PLAIN, 50));
-			g.drawString("Press 1 to restart or 2 to go back to the menu", 350, 200);			
+			g.setColor(Color.MAGENTA);
+			g.setFont(new Font("KinoMT", Font.PLAIN, 40));
+			//g.drawString("You have missed too many notes!", 400, 150);
+			g.drawString("1: Restart    2: Menu", 1175, 710);
 		}
 		if (gameEnded==true && gameLoss==false){
 			// TODO: Replace with victory splash screen
@@ -141,15 +142,23 @@ public class LisaRiccia extends Game{
 				note.setAlpha(1);
 				note.draw(g);
 			}
-			strokeText("Sound Restored!", g, 450, 400);
-			if (collected.size()==0) g.drawString("Press 1 to restart, 2 to go back to the menu, 3 to go to the next level", 50, 250);
+			//strokeText("Sound Restored!", g, 450, 400);
+			if (collected.size()==0) g.drawString("1: Restart   2: Menu   3: Next Level", 40, 710);
 		}
 		g.setFont(new Font("KinoMT", Font.BOLD, 30));
 		String strNotesCollected = "Notes Collected: " + notesCollected + "/" + notesToBeatStage;
 		String strNotesToNextLevel = "Notes To Next Level: " + notesToNextLevel;
+		String strNotesMissed = "Note Lives Left: " + (3 - missedNotes);
 		//g.drawString(strNotesCollected, 1260, 50);
 		strokeText(strNotesCollected, g, 1260, 50);
 		strokeText(strNotesToNextLevel,g, 1200, 90);
+		//strokeText(strNotesMissed, g, 10, 50);
+//		if (missedNotes >= 3) {
+//			g.setColor(Color.RED);
+//			g.drawString("Note Lives Left: 0", 10, 50);
+//			s
+//		}
+		
 		String strTimeElapsed="";
 		if (!gameEnded==true){
 			strTimeElapsed = "Time Elapsed: " + timeElapsed.getElapsedTime();
@@ -239,6 +248,8 @@ public class LisaRiccia extends Game{
 				
 					updateHUD();
 				}
+				
+				
 				
 				/* If player falls to the bottom of the screen, lose */
 				if(player.getPosition().getY()>750){

@@ -1,5 +1,7 @@
 //My lab 5 didn't have all the music and animation functionality, so this lab doesn't either. However, I have all the new requirements for this lab.
 
+// Notes missed decreasing when no notes have gone down yet?
+
 package edu.virginia.beta;
 
 
@@ -32,6 +34,10 @@ public class TempleOfTime extends Game{
 	PhysicsSprite player = new PhysicsSprite("Player", "Player.png");
 	Sprite crosshairs = new Sprite("CrosshairsRed", "crosshairsRed.png");
 	Sprite hookshot = new Sprite("Hookshot", "hookshot.png"); 
+	Sprite deathBar = new Sprite("Death Bar", "death bar.png");
+
+	Sprite lossScreen = new Sprite ("Loss Screen", "End Screen Lost.jpg");
+	Sprite winScreen = new Sprite ("Win Screen", "End Screen Won.jpg");
 	/* Sprite collections */
 	DisplayObjectContainer playerSprites = new DisplayObjectContainer("Player Sprites");
 	ArrayList<String> backgroundFilePaths = new ArrayList<String>();
@@ -57,6 +63,11 @@ public class TempleOfTime extends Game{
 	int notesToNextLevel = 1;
 	int notesPerLevel = 1;
 	int notesToBeatStage = 5;
+	
+	//I DONT KNOW WHAT THE TOTAL NOTES ARE
+	int totalNotes=15;
+	int missedNotes=0;
+	ArrayList<Note> collected = new ArrayList<Note>();
 	/* Audio assets */
 	SoundManager soundManager = new SoundManager();
 	GameClock timeToSwapBGM = new GameClock();
@@ -105,27 +116,42 @@ public class TempleOfTime extends Game{
 		/* Draw HUD */
 		g.setColor(Color.WHITE);
 		if (gameLoss){
-			// TODO: Replace with victory splash screen
-			g.setFont(new Font("KinoMT", Font.PLAIN, 80));
-			g.drawString("You Lose!", 500, 350);
+			lossScreen.draw(g);
+			g.setColor(Color.MAGENTA);
+			g.setFont(new Font("KinoMT", Font.PLAIN, 40));
+			//g.drawString("You have missed too many notes!", 400, 150);
+			g.drawString("1: Restart    2: Menu", 1175, 710);
+			
 			if (tInstance.getSize()==0){
 				this.stop();
 			}			
+			
 		}
 		if (gameEnded==true && gameLoss==false){
 			// TODO: Replace with victory splash screen
 			g.setFont(new Font("KinoMT", Font.PLAIN, 80));
-			strokeText("Sound Restored!", g, 450, 400);
-			if (tInstance.getSize()==0){
-				this.stop();
-			}
+			winScreen.setVisible(true);
+			//strokeText("Sound Restored!", g, 450, 100);
+			//if (tInstance.getSize()==0){
+			//	this.stop();
+			//}
+			g.setFont(new Font("KinoMT", Font.PLAIN, 30));
+			g.setColor(Color.BLACK);
+			if (collected.size()==0) g.drawString("1: Restart   2: Menu   3: Next Level", 40, 710);
 		}
 		g.setFont(new Font("KinoMT", Font.BOLD, 30));
 		String strNotesCollected = "Notes Collected: " + notesCollected + "/" + notesToBeatStage;
 		String strNotesToNextLevel = "Notes To Next Level: " + notesToNextLevel;
+		String strNotesMissed = "Note Lives Left: " + (3 - missedNotes);
 		//g.drawString(strNotesCollected, 1260, 50);
 		strokeText(strNotesCollected, g, 1260, 50);
 		strokeText(strNotesToNextLevel,g, 1200, 90);
+		strokeText(strNotesMissed, g, 10, 50);
+		if (missedNotes >= 3) {
+			g.setColor(Color.RED);
+			g.drawString("Note Lives Left: 0", 10, 50);
+			
+		}
 	}
 		
 	@Override
@@ -137,6 +163,43 @@ public class TempleOfTime extends Game{
 		else{
 			inPlay = true;
 		}
+		
+		if (missedNotes>totalNotes-notesToBeatStage || (gameEnded==true && collected.size()==0)){
+			if (pressedKeys.contains(49)){
+				String[] args={"0"};
+				try {
+					TempleOfTime.main(args);
+					this.exitGame();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			else if (pressedKeys.contains(50)){
+				String[] args={"0"};
+				try {
+					Menu.main(args);
+					this.exitGame();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if (gameEnded==true && collected.size()==0){
+				if (pressedKeys.contains(51)){
+					String[] args={"0"};
+					try {
+						//NOT BRAMBLE WHAT'S AFTER THIS???
+						BrambleBlast.main(args);
+						this.exitGame();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		
 		
 		if (inPlay){
 			if (gameEnded==true){
@@ -171,6 +234,16 @@ public class TempleOfTime extends Game{
 				// Player collides with note
 				if (notesCollection.collidesWithNoteSound(player, tInstance)){
 					updateHUD();
+				}
+				
+				if (notesCollection.collidesWithNoteSound(deathBar, tInstance)){
+					Note note = notesCollection.getCollidedNote();
+					note.setVisible(false);
+					if (missedNotes >= 3) {
+						missedNotes = 3;
+					} else {
+					missedNotes++;
+					}
 				}
 				
 				/* If player falls to the bottom of the screen, lose */

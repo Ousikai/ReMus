@@ -1,5 +1,8 @@
 //My lab 5 didn't have all the music and animation functionality, so this lab doesn't either. However, I have all the new requirements for this lab.
 
+
+// Changed 282
+
 package edu.virginia.beta;
 
 
@@ -129,29 +132,44 @@ public class BaseGame extends Game{
 		/* Draw HUD */
 		g.setColor(Color.WHITE);
 		if (missedNotes>totalNotes-notesToBeatStage){
-			g.setFont(new Font("KinoMT", Font.PLAIN, 50));
+			//g.setFont(new Font("KinoMT", Font.PLAIN, 50));
+			
 			lossScreen.draw(g);
-			g.drawString("You have missed too many notes!", 450, 150);
-			g.drawString("Press 1 to restart or 2 to go back to the menu", 350, 200);
+			g.setColor(Color.MAGENTA);
+			g.setFont(new Font("KinoMT", Font.PLAIN, 40));
+			//g.drawString("You have missed too many notes!", 400, 150);
+			g.drawString("1: Restart    2: Menu", 1175, 710);
 			
 		}
 		if (gameEnded==true){
 			// TODO: Replace with victory splash screen
 			g.setFont(new Font("KinoMT", Font.PLAIN, 80));
 			winScreen.setVisible(true);
-			strokeText("Sound Restored!", g, 450, 100);
+			//strokeText("Sound Restored!", g, 450, 100);
 			//if (tInstance.getSize()==0){
 			//	this.stop();
 			//}
-			g.setFont(new Font("KinoMT", Font.PLAIN, 50));
-			if (collected.size()==0) g.drawString("Press 1 to restart, 2 to go back to the menu, 3 to go to the next level", 50, 250);
+			g.setFont(new Font("KinoMT", Font.PLAIN, 30));
+			g.setColor(Color.BLACK);
+			if (collected.size()==0) g.drawString("1: Restart   2: Menu   3: Next Level", 40, 710);
 		}
 		g.setFont(new Font("KinoMT", Font.BOLD, 30));
 		String strNotesCollected = "Notes Collected: " + notesCollected + "/" + notesToBeatStage;
 		String strNotesToNextLevel = "Notes To Next Level: " + notesToNextLevel;
+		String strNotesMissed = "Note Lives Left: " + (3 - missedNotes);
 		//g.drawString(strNotesCollected, 1260, 50);
 		strokeText(strNotesCollected, g, 1260, 50);
 		strokeText(strNotesToNextLevel,g, 1200, 90);
+		strokeText(strNotesMissed, g, 10, 50);
+		if (missedNotes >= 3) {
+			g.setColor(Color.RED);
+			g.drawString("Note Lives Left: 0", 10, 50);
+			
+		}
+//		} else {
+//			strokeText(strNotesMissed, g, 10, 50);
+//		}
+		
 	}
 		
 	@Override
@@ -263,7 +281,11 @@ public class BaseGame extends Game{
 			if (notesCollection.collidesWithNoteSound(deathBar, tInstance)){
 				Note note = notesCollection.getCollidedNote();
 				note.setVisible(false);
+				if (missedNotes >= 3) {
+					missedNotes = 3;
+				} else {
 				missedNotes++;
+				}
 			}
 			}
 		}
