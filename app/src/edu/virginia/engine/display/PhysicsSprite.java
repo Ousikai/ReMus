@@ -199,11 +199,11 @@ public class PhysicsSprite extends Sprite {
 		}
 		/* (Q) Rotate crosshairs counterclockwise */
 		if (pressedKeys.contains(81)){
-			this.crosshairsAngle -= 1;
+			this.crosshairsAngle -= 3;
 		}
 		/* (E) Rotate crosshairs clockwise */
 		if (pressedKeys.contains(69)){
-			this.crosshairsAngle += 1;
+			this.crosshairsAngle += 3;
 		}
 		/* (Spacebar) Launch hookshot */
 		if (pressedKeys.contains(32) && this.hookReady){
