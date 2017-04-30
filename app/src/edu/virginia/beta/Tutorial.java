@@ -34,6 +34,7 @@ public class Tutorial extends Game{
 	Sprite hookshot = new Sprite("Hookshot", "hookshot.png"); 
 	Sprite deathBar = new Sprite("Death Bar", "death bar.png");
 	/* Sprite collections */
+	DisplayObjectContainer playerSprites = new DisplayObjectContainer("Player Sprites");
 	ArrayList<String> backgroundFilePaths = new ArrayList<String>();
 	DisplayObjectContainer backgroundCollection = new DisplayObjectContainer("Background Collection");
 	DisplayObjectContainer foregroundCollection = new DisplayObjectContainer("Foreground Collection");
@@ -87,6 +88,11 @@ public class Tutorial extends Game{
 			// Set up notes to collect
 			//setupNotes();
 		/* Set up hookshot */
+		/* Set up player sprites as children of Game */
+		setupPlayerSprites(playerSprites,
+				    	   crosshairs, 
+				    	   player, 
+				    	   hookshot);
 		//setUpMenu();
 		HookListener hookListener = new HookListener(player, tInstance, hookshot);
 		PlayerListener playerListener = new PlayerListener(player, tInstance, soundManager);
@@ -105,10 +111,6 @@ public class Tutorial extends Game{
 		
 			super.draw(g);
 			/* Draw assets that are not explicity in Display Tree Hierachy */
-			if (player != null && crosshairs != null){
-			player.draw(g);
-			crosshairs.draw(g);
-			}
 			if(staff != null){
 				staff.draw(g);
 			}

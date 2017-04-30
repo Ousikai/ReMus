@@ -1,7 +1,4 @@
-//My lab 5 didn't have all the music and animation functionality, so this lab doesn't either. However, I have all the new requirements for this lab.
-
 package edu.virginia.beta;
-
 
 import java.awt.Color;
 import java.awt.Font;

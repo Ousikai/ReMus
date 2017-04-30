@@ -12,6 +12,7 @@ public class GamePad {
 	
 	/* The controller that was detected */
 	private Controller controller;
+	private double lastTilt = 0;
 	
 	/* Constants defining the various buttons on a typical controller */
 	/* Might be necessary to change the string bindings depending on your particular gamepad configuration */
@@ -142,10 +143,14 @@ public class GamePad {
 	public boolean isRightStickTilted(){
 		double xAxisAbs = Math.abs(getRightStickXAxis());
 		double yAxisAbs = Math.abs(getRightStickYAxis());
-		double hypotenuse = 0.85;
-		boolean isTilted = xAxisAbs*xAxisAbs + yAxisAbs*yAxisAbs > hypotenuse*hypotenuse;
+		double minTilt = 0.3;
+		double maxTilt = 0.8;
+		double currTilt  = xAxisAbs*xAxisAbs + yAxisAbs*yAxisAbs;
+		//boolean isTilted = currTilt > minTilt*minTilt;
+		boolean isTilted = (currTilt > minTilt*minTilt) 
+							&& ((currTilt > this.lastTilt) || (currTilt > maxTilt*maxTilt));
+		this.lastTilt = currTilt;
 		if (isTilted){
-			//System.out.format("Am tilted| x: %f| y: %f \n", xAxisAbs, yAxisAbs);	
 			return true;
 		}
 		//System.out.println("Not Tilted");
@@ -192,6 +197,14 @@ public class GamePad {
 		    System.out.println(component.getName() + ": " + component.getIdentifier().getName() + "; Data: " + component.getPollData());
 		}
 		System.out.println("---------------------");
+	}
+
+	public double getLastTilt() {
+		return this.lastTilt;
+	}
+
+	public void setLastTitle(double lastTilt) {
+		this.lastTilt = lastTilt;
 	}
 
 }

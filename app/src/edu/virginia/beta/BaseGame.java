@@ -216,9 +216,9 @@ public class BaseGame extends Game{
 			platformCollection.hookablePlatform(crosshairs, player);}
 		
 			/* Have foreground and background elements fall */
-			if (backgroundCollection != null && backgroundInterlude != null){
-			updateBackgroundCollection(backgroundCollection, backgroundInterlude);
-			updateForegroundCollection(foregroundCollection, foregroundInterlude);
+			if (!gameEnded){
+				updateBackgroundCollection(backgroundCollection, backgroundInterlude);
+				updateForegroundCollection(foregroundCollection, foregroundInterlude);
 			}
 		
 			/* Collisions only occur if player can be interacted with */
