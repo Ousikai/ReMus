@@ -1,6 +1,8 @@
 package edu.virginia.engine.display;
 
 import sun.audio.*;
+
+import java.awt.Point;
 import java.io.*;
 
 public class Note extends Sprite{
@@ -36,6 +38,18 @@ public class Note extends Sprite{
 		this.imageName=imageName;
 		this.length=length;
 		// TODO Auto-generated constructor stub
+	}
+	
+	public Note(String id, String imageName, String soundName, String length, int x, int y) throws IOException {
+		super(id, imageName);
+		//InputStream in = new FileInputStream(soundName);
+		//AudioStream audioStream = new AudioStream(in);
+		//this.sound=audioStream;
+		this.sound=soundName;
+		this.goodbad=true;
+		this.imageName=imageName;
+		this.length=length;
+		this.setPosition(new Point(x,y));
 	}
 	
 	public Note(Note n){

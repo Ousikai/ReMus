@@ -6,6 +6,8 @@ import java.util.ArrayList;
 
 import javax.swing.Timer;
 
+import edu.virginia.engine.util.GamePad;
+
 public class AnimatedSprite extends Sprite implements ActionListener {
 	
 	private ArrayList <ArrayList<String>> imgNames;
@@ -107,8 +109,8 @@ public class AnimatedSprite extends Sprite implements ActionListener {
 	
 	
 	@Override
-	public void update(ArrayList<Integer> pressedKeys) {
-		super.update(pressedKeys);
+	public void update(ArrayList<Integer> pressedKeys, ArrayList<GamePad> controllers) {
+		super.update(pressedKeys, controllers);
 	}
 	
 	public void animate (String action){

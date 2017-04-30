@@ -18,6 +18,7 @@ import edu.virginia.engine.util.SoundManager;
 import edu.virginia.engine.util.listeners.CollisionEvent;
 import edu.virginia.engine.util.listeners.MyQuestManager;
 import edu.virginia.engine.util.Event;
+import edu.virginia.engine.util.GamePad;
 import edu.virginia.engine.util.IEventDispatcher;
 import edu.virginia.engine.util.IEventListener;
 
@@ -139,7 +140,7 @@ public class NotesCollection extends Game{
 		}
 		
 	@Override
-	public void update(ArrayList<Integer> pressedKeys){
+	public void update(ArrayList<Integer> pressedKeys, ArrayList<GamePad> controllers){
 		if (gameEnded==true){
 			timeElapsed=Math.min(System.currentTimeMillis()-startTime,3000);
 			
@@ -173,12 +174,13 @@ public class NotesCollection extends Game{
 		marioFalling++;
 		
 		
-		super.update(pressedKeys);
+		/* Update methods */
+		super.update(pressedKeys, controllers);
+		mario.update(pressedKeys, controllers);
 		
 		
 		}
 		/* Make sure mario is not null. Sometimes Swing can auto cause an extra frame to go before everything is initialized */
-		if(mario != null) mario.update(pressedKeys);
 		if (mario != null){
 		if (mario.getPosition().getY()>=600){
 			

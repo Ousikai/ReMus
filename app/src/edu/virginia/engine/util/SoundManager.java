@@ -46,7 +46,7 @@ public class SoundManager implements LineListener{
 
 	}
 	public void PlaySoundEffect(String id){ //sound effects are short and are removed once complete
-		 AudioPlayer.player.start(soundEffects.get(id));
+		AudioPlayer.player.start(soundEffects.get(id));
 	}
 	public void LoadBGM(int level, String filename) throws IOException{
 		File audioFile = new File("resources/" + filename);

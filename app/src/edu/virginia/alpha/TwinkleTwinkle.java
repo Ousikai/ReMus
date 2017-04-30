@@ -20,6 +20,7 @@ import edu.virginia.engine.display.TweenJuggler;
 import edu.virginia.engine.display.TweenableParams;
 import edu.virginia.engine.util.Event;
 import edu.virginia.engine.util.GameClock;
+import edu.virginia.engine.util.GamePad;
 import edu.virginia.engine.util.SoundManager;
 import edu.virginia.engine.util.listeners.CollisionEvent;
 import edu.virginia.engine.util.listeners.HookListener;
@@ -29,7 +30,9 @@ public class TwinkleTwinkle extends Game{
 	/* Player variables */
 	PhysicsSprite player = new PhysicsSprite("Player", "Player.png");
 	Sprite crosshairs = new Sprite("Crosshairs", "crosshairs7.png");
+	Sprite hookshot = new Sprite("Hookshot", "hookshot.png");
 	/* Sprite collections */
+	DisplayObjectContainer playerSprites = new DisplayObjectContainer("Player Sprites");
 	ArrayList<String> backgroundFilePaths = new ArrayList<String>();
 	DisplayObjectContainer backgroundCollection = new DisplayObjectContainer("Background Collection");
 	DisplayObjectContainer foregroundCollection = new DisplayObjectContainer("Foreground Collection");
@@ -63,8 +66,9 @@ public class TwinkleTwinkle extends Game{
 		else {tInstance = TweenJuggler.getInstance();}
 		/* Set Player Sprite positions */
 		player.setPosition(new Point(100, 500));
+		player.setCrosshairsAngle(270);
 		crosshairs.setPivotPoint(new Point(-26, -26));
-		drawCrosshairsKeyboard(crosshairs, player);
+		drawCrosshairsKeyboard(crosshairs, player, hookshot);
 		/* Set up backgrounds */
 		this.addChild(backgroundCollection);
 		setupBackgrounds();
@@ -72,10 +76,15 @@ public class TwinkleTwinkle extends Game{
 		this.addChild(foregroundCollection);
 			// Set up platforms and notes
 			setupPlatformsAndNotes();
+		/* Set up player sprites as children of Game */
+		setupPlayerSprites(playerSprites,
+				    	   crosshairs, 
+				    	   player, 
+				    	   hookshot);
 		/* Set up hookshot */
-		HookListener hookListener = new HookListener(player, tInstance);
-		PlayerListener playerListener = new PlayerListener(player, tInstance);
-		this.setupHookshot(player, playerListener, hookListener);
+		HookListener hookListener = new HookListener(player, tInstance, hookshot);
+		PlayerListener playerListener = new PlayerListener(player, tInstance, soundManager);
+		this.setupHookshot(player, playerListener, hookListener, hookshot);
 		/* Set up audio */
 		setupAudio();
 	}
@@ -89,9 +98,6 @@ public class TwinkleTwinkle extends Game{
 	public void draw(Graphics g){
 		/* Draw all assets */
 		super.draw(g);
-		/* Draw assets that are not explicity in Display Tree Hierachy */
-		player.draw(g);
-		crosshairs.draw(g);
 		// Draw HUD
 		if (gameLoss){
 			g.setFont(new Font("KinoMT", Font.PLAIN, 80));
@@ -114,7 +120,7 @@ public class TwinkleTwinkle extends Game{
 	}
 		
 	@Override
-	public void update(ArrayList<Integer> pressedKeys){
+	public void update(ArrayList<Integer> pressedKeys, ArrayList<GamePad> controllers){
 		// Hold 'P' to pause (for debugging)
 		if ((pressedKeys.contains(80))){
 			inPlay = false;
@@ -130,11 +136,11 @@ public class TwinkleTwinkle extends Game{
 			if (tInstance!=null){tInstance.nextFrame();}
 			
 			/* Update methods */
-			super.update(pressedKeys);
-			player.update(pressedKeys);
+			super.update(pressedKeys, controllers);
+			player.update(pressedKeys, controllers);
 			
 			/* Update hook status */
-			drawCrosshairsKeyboard(crosshairs, player);
+			drawCrosshairsKeyboard(crosshairs, player, hookshot);
 			platformCollection.hookablePlatform(crosshairs, player);
 		
 			/* Have foreground and background elements fall */
@@ -152,7 +158,7 @@ public class TwinkleTwinkle extends Game{
 					player.dispatchEvent(new Event(CollisionEvent.INAIR, null));
 				}
 				// Player collides with note
-				if (notesCollection.collidesWithNote(player)){
+				if (notesCollection.collidesWithNoteSound(player, tInstance)){
 					updateHUD();
 				}
 				

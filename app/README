@@ -1,0 +1,13 @@
+Yatian Li (yl6xr), Oscar Sandoval (oks2vd), Chante Mack (crm3vq)
+
+Go to the "beta" folder, then run "Menu.java" to start the game.
+
+Goals accomplished:
+
+Start screen (Menu.java)
+All levels done (Tutorial.java, BaseGame.java, BrambleBlast.java, LisaRiccia.java, TheTower.java, TempleOfTime.java)
+End screens - Yep!
+Replay - Yep!
+**The last level doesn't have end screens or replay yet, these will be in the final
+Can be buggy
+

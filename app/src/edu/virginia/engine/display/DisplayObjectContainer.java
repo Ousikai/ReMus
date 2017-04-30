@@ -7,7 +7,9 @@ import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import edu.virginia.engine.display.Note;
 import edu.virginia.engine.util.Event;
+import edu.virginia.engine.util.GamePad;
 import edu.virginia.engine.util.SoundManager;
 import edu.virginia.engine.util.listeners.CollisionEvent;
 import edu.virginia.engine.util.listeners.HookEvent;
@@ -78,44 +80,68 @@ public class DisplayObjectContainer extends DisplayObject{
 			DisplayObject platform = children.get(i);
 			boolean isColliding = platform.collidesWith(player);
 			int playerBottom = (int) player.getPosition().getY() + player.getUnscaledWidth();
-			boolean fallingFromAbove = playerBottom - (int) platform.getPosition().getY() < 20;
+			//TODO: Fix this boolean, you pass through the platform sometimes when you shouldn't...
+			boolean fallingFromAbove = playerBottom - (int) platform.getPosition().getY() < 30;
+			boolean fallingTooFast =  player.getYVel() > 15;
 			/* Other is colliding with platform */
-			if (isColliding && fallingFromAbove){
-				player.dispatchEvent(new Event(CollisionEvent.PLATFORM, platform));
+			//System.out.format("isColliding: %s && fallingFromAbove: %s\n", isColliding, fallingFromAbove);
+			if (isColliding && (fallingFromAbove || fallingTooFast)){
+				if (platform.getId().equals(PlatformType.HANG)){
+					//Do nothing, can't stand on this platform
+				}
+				else if (platform.getId().equals(PlatformType.HORIZONTAL)){
+					player.dispatchEvent(new Event(CollisionEvent.HORIZONTAL, platform));	
+				}
+				else if (platform.getId().equals(PlatformType.VERTICAL)){
+					player.dispatchEvent(new Event(CollisionEvent.VERTICAL, platform));	
+				}
+				else if (platform.getId().equals(PlatformType.BOUNCY)){
+					player.dispatchEvent(new Event(CollisionEvent.BOUNCY, platform));	
+				}
+				else {
+					player.dispatchEvent(new Event(CollisionEvent.PLATFORM, platform));						
+				}			
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public boolean collidesWithNote(PhysicsSprite player){
+	/**public boolean collidesWithNote(PhysicsSprite player){
 		for (int i=0; i<children.size(); i++){
 			DisplayObject note = children.get(i);
 			/* Only collide with notes that are in play */
-			if (note.getInPlay() && note.collidesWith(player)){
+			/**if (note.getInPlay() && note.collidesWith(player)){
 				note.setInPlay(false);
 				note.setVisible(false);
 				return true;
 			}
 		}
 		return false;
-	}	
+	}**/
 	
-	public boolean collidesWithNoteSound(PhysicsSprite player){
+	public boolean collidesWithNoteSound(Sprite player, TweenJuggler tweenJuggler){
 		for (int i=0; i<children.size(); i++){
 			DisplayObject note = children.get(i);
 			/* Only collide with notes that are in play */
 			if (note.getInPlay() && note.collidesWith(player)){
 				note.setInPlay(false);
-				note.setVisible(false);
 				this.collidedNote=(Note)note;
+				if (!player.getId().equals("Death Bar")){
+					try {
+						soundManager.LoadSoundEffect(((Note)note).getSound(), ((Note)note).getSound());
+						soundManager.PlaySoundEffect(((Note)note).getSound());
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				
-				try {
-					soundManager.LoadSoundEffect(((Note)note).getSound(), ((Note)note).getSound());
-					soundManager.PlaySoundEffect(((Note)note).getSound());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				//Tween Note!
+				int oldY = (int) note.getPosition().getY();
+				Tween noteCollected = new Tween (note, null, null);
+				noteCollected.animate(TweenableParams.ALPHA, 1, 0, 500);
+				noteCollected.animate(TweenableParams.Y, oldY, oldY - 100, 500);
+				tweenJuggler.add(noteCollected);
 				}
 				return true;
 			}
@@ -164,11 +190,21 @@ public class DisplayObjectContainer extends DisplayObject{
 					int hookY = (int) platform.getPosition().getY();
 					hookObject.setPosition(new Point(hookX, hookY));
 					player.dispatchEvent(new Event(HookEvent.CANHOOK, hookObject));
+					//Change crosshairs to green if not green previously
+					if (!crosshairs.getId().equals(HookEvent.GREEN)){
+						crosshairs.setId(HookEvent.GREEN);
+						crosshairs.setImage("crosshairsGreen.png");
+					}
 					return true;
 				}
 			}
 		}
 		player.dispatchEvent(new Event(HookEvent.CANNOTHOOK, null));
+		//Change crosshairs to red if not red previously
+		if (!crosshairs.getId().equals(HookEvent.RED)){
+			crosshairs.setId(HookEvent.RED);
+			crosshairs.setImage("crosshairsRed.png");
+		}
 		return false;
 	}
 	
@@ -185,12 +221,12 @@ public class DisplayObjectContainer extends DisplayObject{
 	}
 	
 	@Override
-	public void update(ArrayList<Integer> pressedKeys){
-	    super.update(pressedKeys);
+	public void update(ArrayList<Integer> pressedKeys, ArrayList<GamePad> controllers){
+	    super.update(pressedKeys, controllers);
 	    // Update Children
 	    for	(int i = 0; i < this.numberOfChildren(); i++) {
 	      DisplayObject child = this.getChildAtIndex(i);
-	      child.update(pressedKeys);
+	      child.update(pressedKeys, controllers);
 	    }
 	  }
 	

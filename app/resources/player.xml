@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<player>
+  <idle-right frames="2">
+    <frame0 x="10" y="10" width="114" height="114"></frame0>
+    <frame1 x="145" y="10" width="114" height="114"></frame1>
+  </idle-right>
+  <idle-left frames="2">
+    <frame0 x="10" y="128" width="114" height="114"></frame0>
+    <frame1 x="145" y="128" width="114" height="114"></frame1>
+  </idle-left>
+  <walk-right frames="2">
+   <frame0 x="10" y="248" width="124" height="114"></frame0>
+   <frame1 x="145" y="248" width="124" height="114"></frame1>
+  </walk-right>
+  <walk-left frames="2">
+   <frame0 x="10" y="368" width="124" height="114"></frame0>
+   <frame1 x="145" y="368" width="124" height="114"></frame1>
+ </walk-left>
+ <hook-right frames="1">
+   <frame0 x="10" y="488" width="114" height="114"></frame0>
+ </hook-right>
+ <hook-left frames="1">
+   <frame0 x="10" y="608" width="114" height="114"></frame0>
+ </hook-left>
+</player>

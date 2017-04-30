@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import edu.virginia.engine.util.EventDispatcher;
+import edu.virginia.engine.util.GamePad;
 
 /**
  * A very basic display object for a java based gaming engine
@@ -185,6 +186,16 @@ public class DisplayObject extends EventDispatcher{
 		return hitbox;
 	}
 	
+	private int getScaledHeight() {
+		if(displayImage == null) return 0;
+		return (int) (displayImage.getWidth() * this.getScaleX());
+	}
+
+	private int getScaledWidth() {
+		if(displayImage == null) return 0;
+		return (int) (displayImage.getHeight() * this.getScaleY());
+	}
+
 	public DisplayObject getParent(){
 		if (this.parent != null){
 			return this.parent;
@@ -260,7 +271,7 @@ public class DisplayObject extends EventDispatcher{
 	 * objects state before the draw occurs. Should be overridden if necessary
 	 * to update objects appropriately.
 	 * */
-	protected void update(ArrayList<Integer> pressedKeys) {
+	protected void update(ArrayList<Integer> pressedKeys, ArrayList<GamePad> controllers) {
 	}
 
 	/**

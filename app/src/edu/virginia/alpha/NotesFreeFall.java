@@ -21,6 +21,7 @@ import edu.virginia.engine.display.TweenJuggler;
 import edu.virginia.engine.display.TweenableParams;
 import edu.virginia.engine.util.Event;
 import edu.virginia.engine.util.GameClock;
+import edu.virginia.engine.util.GamePad;
 import edu.virginia.engine.util.listeners.CollisionEvent;
 import edu.virginia.engine.util.listeners.HookListener;
 import edu.virginia.engine.util.listeners.PlayerListener;
@@ -29,7 +30,9 @@ public class NotesFreeFall extends Game{
 	/* Player variables */
 	PhysicsSprite player = new PhysicsSprite("Player", "Player.png");
 	Sprite crosshairs = new Sprite("Crosshairs", "crosshairs7.png");
+	Sprite hookshot = new Sprite("Hookshot", "hookshot.png"); 
 	/* Sprite collections */
+	DisplayObjectContainer playerSprites = new DisplayObjectContainer("Player Sprites");
 	ArrayList<String> backgroundFilePaths = new ArrayList<String>();
 	DisplayObjectContainer backgroundCollection = new DisplayObjectContainer("Background Collection");
 	DisplayObjectContainer foregroundCollection = new DisplayObjectContainer("Foreground Collection");
@@ -65,8 +68,7 @@ public class NotesFreeFall extends Game{
 		else {tInstance = TweenJuggler.getInstance();}
 		/* Set Player Sprite positions */
 		player.setPosition(new Point(100, 600));
-		crosshairs.setPivotPoint(new Point(-26, -26));
-		drawCrosshairsKeyboard(crosshairs, player);
+		drawCrosshairsKeyboard(crosshairs, player, hookshot);
 		staff.setPosition(new Point(200, 250));
 		staff.setVisible(false);
 		/* Set up backgrounds */
@@ -76,12 +78,15 @@ public class NotesFreeFall extends Game{
 		this.addChild(foregroundCollection);
 			// Set up platforms 
 			setupPlatforms();
-			// Set up notes to collect
-			//setupNotes();
+			/* Set up player sprites as children of Game */
+			setupPlayerSprites(playerSprites,
+					    	   crosshairs, 
+					    	   player, 
+					    	   hookshot);
 		/* Set up hookshot */
-		HookListener hookListener = new HookListener(player, tInstance);
-		PlayerListener playerListener = new PlayerListener(player, tInstance);
-		this.setupHookshot(player, playerListener, hookListener);
+		HookListener hookListener = new HookListener(player, tInstance, hookshot);
+		PlayerListener playerListener = new PlayerListener(player, tInstance, soundManager);
+		this.setupHookshot(player, playerListener, hookListener, hookshot);
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -93,11 +98,6 @@ public class NotesFreeFall extends Game{
 	public void draw(Graphics g){
 		/* Draw all assets */
 		super.draw(g);
-		/* Draw assets that are not explicity in Display Tree Hierachy */
-		if (player != null && crosshairs != null){
-		player.draw(g);
-		crosshairs.draw(g);
-		}
 		if(staff != null){
 			staff.draw(g);
 		}
@@ -123,7 +123,7 @@ public class NotesFreeFall extends Game{
 	}
 		
 	@Override
-	public void update(ArrayList<Integer> pressedKeys){
+	public void update(ArrayList<Integer> pressedKeys, ArrayList<GamePad> controllers){
 		// Hold 'P' to pause (for debugging)
 		if ((pressedKeys.contains(80))){
 			inPlay = false;
@@ -139,11 +139,11 @@ public class NotesFreeFall extends Game{
 			if (tInstance!=null){tInstance.nextFrame();}
 			
 			/* Update methods */
-			super.update(pressedKeys);
-			if (player != null && pressedKeys != null) player.update(pressedKeys);
+			super.update(pressedKeys, controllers);
+			player.update(pressedKeys, controllers);
 			
 			/* Update hook status */
-			drawCrosshairsKeyboard(crosshairs, player);
+			drawCrosshairsKeyboard(crosshairs, player, hookshot);
 			if (player != null){
 			platformCollection.hookablePlatform(crosshairs, player);}
 		
@@ -165,7 +165,7 @@ public class NotesFreeFall extends Game{
 					player.dispatchEvent(new Event(CollisionEvent.INAIR, null));
 				}
 				// Player collides with note
-				if (notesCollection.collidesWithNoteSound(player)){
+				if (notesCollection.collidesWithNoteSound(player, tInstance)){
 					updateHUD();
 					Note note = notesCollection.getCollidedNote();
 					collected.add(note);

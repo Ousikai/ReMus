@@ -1,16 +1,14 @@
 package edu.virginia.engine.display;
 
 import java.awt.AlphaComposite;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
@@ -18,19 +16,21 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
-import edu.virginia.engine.util.Event;
+import edu.virginia.engine.util.GamePad;
 import edu.virginia.engine.util.listeners.CollisionEvent;
 import edu.virginia.engine.util.listeners.HookEvent;
 import edu.virginia.engine.util.listeners.HookListener;
 import edu.virginia.engine.util.listeners.PlayerEvent;
 import edu.virginia.engine.util.listeners.PlayerListener;
 
+import net.java.games.input.*;
+
 
 /**
  * Highest level class for creating a game in Java.
  * 
  * */
-public class Game extends DisplayObjectContainer implements ActionListener, KeyListener, MouseListener {
+public class Game extends DisplayObjectContainer implements ActionListener, KeyListener {
 
 	/* Frames per second this game runs at */
 	private int FRAMES_PER_SEC = 60;
@@ -44,21 +44,36 @@ public class Game extends DisplayObjectContainer implements ActionListener, KeyL
 	/* The JPanel for this game */
 	private GameScenePanel scenePanel;
 	
-	TweenJuggler tInstance;
+	/* Connected Game Controllers */
+	private ArrayList<GamePad> controllers;
 
 	public Game(String gameId, int width, int height) {
 		super(gameId);
-		if (TweenJuggler.getInstance() == null){
-			TweenJuggler tInstance = new TweenJuggler();
-		}
 		setUpMainFrame(gameId, width, height);
 		
 		setScenePanel(new GameScenePanel(this));
 		
 		/* Use an absolute layout */
 		scenePanel.setLayout(null);
+		
+		/* Search for and add any controllers that are connected */
+		controllers = new ArrayList<GamePad>();
+		ControllerEnvironment ce = ControllerEnvironment.getDefaultEnvironment(); 
+		Controller[] cs = ce.getControllers(); 
+		for (int i = 0; i < cs.length; i++) {
+			Controller controller = cs[i];
+			if (
+                    controller.getType() == Controller.Type.STICK || 
+                    controller.getType() == Controller.Type.GAMEPAD || 
+                    controller.getType() == Controller.Type.WHEEL ||
+                    controller.getType() == Controller.Type.FINGERSTICK
+               )
+            {
+				System.out.println("Found Controller: " + controller.getName() + ", " + controller.getType() ); 
+				controllers.add(new GamePad(controller));
+            }
+		}	
 	}
-	
 	
 	public void setFramesPerSecond(int fps){
 		if(fps > 0) this.FRAMES_PER_SEC = fps;
@@ -77,7 +92,6 @@ public class Game extends DisplayObjectContainer implements ActionListener, KeyL
 			}
 		});
 		getMainFrame().addKeyListener(this);
-		getMainFrame().addMouseListener(this);
 	}
 
 	/**
@@ -146,13 +160,10 @@ public class Game extends DisplayObjectContainer implements ActionListener, KeyL
 
 	protected void nextFrame(Graphics g) {
 		try {
-			if (tInstance!=null){
-				
-				tInstance.nextFrame();
-				//System.out.println(tInstance.getSize());
-				}
+			/* Poll for any wireless controller buttons that are pressed down */
+			pollControllers();
 			/* Update all objects on the stage */
-			this.update(pressedKeys);
+			this.update(pressedKeys, controllers);
 			/* Draw everything on the screen */
 			this.draw(g);
 		} catch (Exception e) {
@@ -162,6 +173,16 @@ public class Game extends DisplayObjectContainer implements ActionListener, KeyL
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * Searches all known controllers (ps3, etc.) and adds any pressed buttons to pressed keys
+	 * */
+	private void pollControllers(){
+		for(GamePad controller : controllers){
+			controller.update();
+		}
+		//controllers.get(0).printButtonSummary();
+	}	
 	
 	@Override
 	public void draw(Graphics g){
@@ -207,29 +228,51 @@ public class Game extends DisplayObjectContainer implements ActionListener, KeyL
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public void setupPlayerSprites(DisplayObjectContainer playerSprites,
+								   Sprite crosshairs, 
+								   PhysicsSprite player, 
+								   Sprite hookshot){
+		playerSprites.addChild(player);
+		playerSprites.addChild(crosshairs);
+		playerSprites.addChild(hookshot);
+		this.addChild(playerSprites);
+	}
 
 	public void setupHookshot(PhysicsSprite player, 
 							  PlayerListener playerListener, 
-							  HookListener hookListener){
+							  HookListener hookListener,
+							  Sprite hookshot){
 		/* Set event listeners */
 		/* Set player event listeners */
 		player.addEventListener(playerListener, CollisionEvent.PLATFORM);
+		player.addEventListener(playerListener, CollisionEvent.HORIZONTAL);
+		player.addEventListener(playerListener, CollisionEvent.VERTICAL);
+		player.addEventListener(playerListener, CollisionEvent.BOUNCY);
 		player.addEventListener(playerListener, CollisionEvent.GROUND);
 		player.addEventListener(playerListener, CollisionEvent.INAIR);
 		player.addEventListener(playerListener, PlayerEvent.ResetFall);
 		/* Set hookshot event listeners */
 		player.addEventListener(hookListener, HookEvent.HOOKPRESSED);
-		player.addEventListener(hookListener, HookEvent.HOOKRELEASED);
+		player.addEventListener(hookListener, HookEvent.HOOKRETRACT);
+		player.addEventListener(hookListener, HookEvent.HOOKREADY);
 		player.addEventListener(hookListener, HookEvent.CANHOOK);
 		player.addEventListener(hookListener, HookEvent.CANNOTHOOK);
 		player.addEventListener(hookListener, HookEvent.HOOKHOP);		
+		/* Set up hookshot visibility */
+		hookshot.setPosition(new Point(player.getCenterX(), player.getCenterY()));
+		hookshot.setVisible(false);
+		hookshot.setScaleX(0.1);
 	}
 	
-	public void drawCrosshairsKeyboard(Sprite crosshairs, PhysicsSprite player){
+	public void drawCrosshairsKeyboard(Sprite crosshairs, PhysicsSprite player, Sprite hookshot){
 		/* Find where crosshair should be based on mouse location */
 		float crosshairsAngle = player.getCrosshairsAngle();
+		hookshot.setPosition(new Point(player.getCenterX(), player.getCenterY()));
+		hookshot.setRotation(crosshairsAngle);
+		//System.out.println("Current Angle: " + crosshairsAngle);
 		/* Set crosshair position, where center is player Center */
-		int radius = 200;
+		int radius = player.getHookshotLength();
 		int radiusX = (int) (Math.cos(Math.toRadians(crosshairsAngle)) * radius);
 		int radiusY = (int) (Math.sin(Math.toRadians(crosshairsAngle)) * radius);
 		int crosshairsX = player.getCenterX() + radiusX;
@@ -240,41 +283,16 @@ public class Game extends DisplayObjectContainer implements ActionListener, KeyL
 		Point adjustedPoint = new Point(crosshairsX, crosshairsY);
 		crosshairs.setPosition(adjustedPoint);
 	}
-
-	@Override
-	public void mouseClicked(MouseEvent arg0) {
-		
+	
+	public void strokeText(String text, Graphics g, int x, int y){
+		g.setColor(Color.BLACK);
+		int strokeAmount = 2;
+		g.drawString(text, x+strokeAmount, y);
+		g.drawString(text, x-strokeAmount, y);
+		g.drawString(text, x, y+strokeAmount);
+		g.drawString(text, x, y-strokeAmount);
+		g.setColor(Color.WHITE);
+		g.drawString(text, x, y);
 	}
 
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		/*
-		System.out.println("Pressed"); 
-		Event hookPressed = new Event();
-		hookPressed.setEventType(HookEvent.HOOKPRESSED);
-		hookPressed.setSource(null);
-		this.dispatchEvent(hookPressed);
-		*/
-	}
-
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		
-	}
 }
