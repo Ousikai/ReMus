@@ -199,11 +199,11 @@ public class PhysicsSprite extends Sprite {
 		}
 		/* (Q) Rotate crosshairs counterclockwise */
 		if (pressedKeys.contains(81)){
-			this.crosshairsAngle -= 3;
+			this.crosshairsAngle -= 1;
 		}
 		/* (E) Rotate crosshairs clockwise */
 		if (pressedKeys.contains(69)){
-			this.crosshairsAngle += 3;
+			this.crosshairsAngle += 1;
 		}
 		/* (Spacebar) Launch hookshot */
 		if (pressedKeys.contains(32) && this.hookReady){
@@ -214,7 +214,7 @@ public class PhysicsSprite extends Sprite {
 	
 	public void keyboardAndXbox360(ArrayList<Integer> pressedKeys, GamePad xbox360){
 		/* Keyboard (Up) || Xbox360 (A) -> Jump into the air */
-		if (!this.isInAir() && (pressedKeys.contains(38) || xbox360.isButtonPressed(GamePad.BUTTON_A))){
+		if (!this.isInAir() && (pressedKeys.contains(38) || xbox360.isButtonPressed(GamePad.BUTTON_A) || xbox360.isLeftTriggerPressed())){
 			this.yVel = -jumpHeight;
 			this.inAir = true;
 		}
