@@ -1,4 +1,6 @@
 
+# **🎼 ReMus: Restoration of Music 🎼**
+
 ![ReMus-Landing](https://mtfalls.github.io/docs/ReMus/ReMus_Landing.png)
 
 For [CS 4730 (Game Design) at the University of Virginia](https://stardock.cs.virginia.edu/gamedesign/)
